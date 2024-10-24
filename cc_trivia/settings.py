@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-ih4_6_l2lkv3b5k!=*kfy&i$vz(ua+1hms@9&&&ld5@ix&b9yh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cc_trivia.herokuapp.com', 'localhost']
+ALLOWED_HOSTS = ['cc_trivia.herokuapp.com', 'localhost', 'cc-trivia-85d6d90498d2.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
