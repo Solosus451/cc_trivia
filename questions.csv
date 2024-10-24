@@ -1,0 +1,6 @@
+question_text,option_a,option_b,option_c,option_d,correct_answer,points
+"¿Qué es el cambio climático?", "Un fenómeno atmosférico de corto plazo", "Un cambio en los patrones climáticos durante un período prolongado", "Un fenómeno relacionado exclusivamente con el calentamiento global", "Ninguna de las anteriores",B, 10
+"¿Cuál es una de las principales causas del cambio climático?", "Actividad volcánica", "Emisiones de gases de efecto invernadero por la quema de combustibles fósiles", "Oscilaciones naturales del Sol", "Movimientos tectónicos",B, 10
+"¿Qué gas de efecto invernadero es responsable en gran parte del calentamiento global?", "Dióxido de carbono (CO₂)", "Oxígeno (O₂)", "Nitrógeno (N₂)", "Ozono (O₃)",A, 10
+"¿Cuál de las siguientes actividades humanas contribuye al aumento de CO₂ en la atmósfera?", "Reforestación", "Agricultura orgánica", "Uso de energías renovables", "Quema de combustibles fósiles",D, 10
+"¿Qué fenómeno climático extremo es una consecuencia directa del cambio climático?", "Aumento en la frecuencia de huracanes", "Erupciones volcánicas", "Migración de placas tectónicas", "Días más cortos",A, 10

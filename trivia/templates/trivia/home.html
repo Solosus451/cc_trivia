@@ -1,0 +1,11 @@
+{% extends 'trivia/base.html' %}
+
+{% block title %}Bienvenido a Conciencia Climática{% endblock %}
+
+{% block content %}
+<h2>Bienvenido a Conciencia Climática</h2>
+<p>Esta página tiene como objetivo crear conciencia sobre el cambio climático a través de una divertida trivia.</p>
+<p>Puedes participar en la trivia haciendo clic en el enlace "Trivia" en el menú superior.</p>
+<p>Responde correctamente las preguntas para acumular puntos durante el juego.</p>
+<a href="{% url 'trivia:instructions' %}">Ir a la Trivia</a>
+{% endblock %}

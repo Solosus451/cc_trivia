@@ -1,0 +1,13 @@
+{% extends 'trivia/base.html' %}
+
+{% block title %}Instrucciones{% endblock %}
+
+{% block content %}
+<h2>Instrucciones</h2>
+<p>Responde correctamente las preguntas para ganar puntos. Si te equivocas 3 veces, el juego terminará.</p>
+
+<!-- Al hacer submit, redirige a la vista del juego -->
+<form method="GET" action="{% url 'trivia:game' %}">
+    <button type="submit">Comenzar</button>
+</form>
+{% endblock %}

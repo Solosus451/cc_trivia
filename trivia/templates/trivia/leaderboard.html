@@ -1,0 +1,27 @@
+{% extends 'trivia/base.html' %}
+
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+<h2>Ranking</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Puntaje</th>
+            <th>Respuestas Correctas</th>
+            <th>Respuestas Incorrectas</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in leaderboard_entries %}
+        <tr>
+            <td>{{ entry.user.username }}</td>
+            <td>{{ entry.score }}</td>
+            <td>{{ entry.correct_answers }}</td>
+            <td>{{ entry.incorrect_answers }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'trivia/base.html' %}
+
+{% block title %}Trivia Game{% endblock %}
+
+{% block content %}
+<h2>{{ question.question_text }}</h2>
+<form method="POST" action="{% url 'trivia:game' %}">
+    {% csrf_token %}
+    <p>{{ question.question_text }}</p>
+    <input type="hidden" name="question_id" value="{{ question.id }}">
+
+    <label>
+        <input type="radio" name="answer" value="a">  <!-- Aquí cambia el valor a "a" -->
+        {{ question.option_a }}
+    </label><br>
+
+    <label>
+        <input type="radio" name="answer" value="b">  <!-- Aquí cambia el valor a "b" -->
+        {{ question.option_b }}
+    </label><br>
+
+    <label>
+        <input type="radio" name="answer" value="c">  <!-- Aquí cambia el valor a "c" -->
+        {{ question.option_c }}
+    </label><br>
+
+    <label>
+        <input type="radio" name="answer" value="d">  <!-- Aquí cambia el valor a "d" -->
+        {{ question.option_d }}
+    </label><br>
+
+    <button type="submit">Enviar</button>
+</form>
+<p>Puntaje: {{ request.session.score }}</p>
+<p>Vidas: {{ request.session.lives }}</p>
+{% endblock %}

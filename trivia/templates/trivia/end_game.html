@@ -1,0 +1,12 @@
+{% extends 'trivia/base.html' %}
+
+{% block title %}Game Over{% endblock %}
+
+{% block content %}
+<h2>Juego Terminado</h2>
+<p>¡Has terminado el juego!</p>
+<p>Puntaje: {{ leaderboard_entry.score }}</p>
+<p>Respuestas Correctas: {{ leaderboard_entry.correct_answers }}</p>
+<p>Respuestas Incorrectas: {{ leaderboard_entry.incorrect_answers }}</p>
+<a href="{% url 'trivia:leaderboard' %}">Ver Ranking</a>
+{% endblock %}
