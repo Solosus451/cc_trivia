@@ -85,6 +85,7 @@ DATABASES = {
     }
 }
 
+# Si la variable DATABASE_URL está definida (en producción en Heroku)
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
     DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
