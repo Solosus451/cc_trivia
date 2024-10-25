@@ -14,7 +14,7 @@ def instructions(request):
     return render(request, 'trivia/instructions.html')
 
 
-# Vista para el login (login.html)
+
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get('username')
@@ -28,13 +28,12 @@ def login_view(request):
     return render(request, 'trivia/login.html')
 
 
-# Vista para el registro (register.html)
 def register_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')  # Redirige al login después del registro exitoso
+            return redirect('login')
     else:
         form = UserCreationForm()
     return render(request, 'trivia/register.html', {'form': form})
@@ -49,13 +48,12 @@ def trivia_game(request):
 
     if request.method == 'POST':
         selected_answer = request.POST.get(
-            'answer').strip().lower()  # Respuesta seleccionada (ahora es "a", "b", "c" o "d")
+            'answer').strip().lower()
         question_id = request.POST.get('question_id')
         question = Question.objects.get(id=question_id)
 
-        correct_answer = question.correct_answer.strip().lower()  # La respuesta correcta almacenada en la base de datos ("a", "b", "c" o "d")
+        correct_answer = question.correct_answer.strip().lower()
 
-        # Depuración: Ver qué respuestas estamos comparando
         print(f"Selected answer: {selected_answer}")
         print(f"Correct answer: {correct_answer}")
 
@@ -70,7 +68,6 @@ def trivia_game(request):
         if request.session['lives'] <= 0:
             return redirect('trivia:end_game')
 
-    # Obtener una pregunta aleatoria
     questions = Question.objects.all()
     question = random.choice(questions)
 
@@ -82,14 +79,12 @@ def trivia_game(request):
 
 @login_required
 def end_game(request):
-    # Guardar el puntaje en el ranking
     leaderboard_entry = Leaderboard.objects.create(
         user=request.user,
         score=request.session['score'],
         correct_answers=request.session['questions_answered'],
         incorrect_answers=3 - request.session['lives']
     )
-    # Resetear sesión
     del request.session['lives']
     del request.session['score']
     del request.session['questions_answered']
