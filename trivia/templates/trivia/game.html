@@ -4,51 +4,27 @@
 
 {% block content %}
 <h2>{{ question.question_text }}</h2>
-<form method="POST" action="{% url 'trivia:game' %}" onsubmit="return validateForm()">
+<form method="POST" action="{% url 'trivia:game' %}">
     {% csrf_token %}
-    <p>{{ question.question_text }}</p>
     <input type="hidden" name="question_id" value="{{ question.id }}">
-
     <label>
-        <input type="radio" name="answer" value="a">
-        {{ question.option_a }}
+        <input type="radio" name="answer" value="a"> {{ question.option_a }}
     </label><br>
-
     <label>
-        <input type="radio" name="answer" value="b">
-        {{ question.option_b }}
+        <input type="radio" name="answer" value="b"> {{ question.option_b }}
     </label><br>
-
     <label>
-        <input type="radio" name="answer" value="c">
-        {{ question.option_c }}
+        <input type="radio" name="answer" value="c"> {{ question.option_c }}
     </label><br>
-
     <label>
-        <input type="radio" name="answer" value="d">
-        {{ question.option_d }}
+        <input type="radio" name="answer" value="d"> {{ question.option_d }}
     </label><br>
-
     <button type="submit">Enviar</button>
 </form>
+
 <p>Puntaje: {{ request.session.score }}</p>
 <p>Vidas: {{ request.session.lives }}</p>
-
-<script>
-function validateForm() {
-    const options = document.getElementsByName('answer');
-    let isChecked = false;
-    for (let i = 0; i < options.length; i++) {
-        if (options[i].checked) {
-            isChecked = true;
-            break;
-        }
-    }
-    if (!isChecked) {
-        alert('Por favor, selecciona una respuesta antes de enviar.');
-        return false;
-    }
-    return true;
-}
-</script>
+{% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+{% endif %}
 {% endblock %}

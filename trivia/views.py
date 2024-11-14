@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from .models import Question, Leaderboard
+from django.contrib import messages
 import random
 
 
@@ -55,7 +56,15 @@ def trivia_game(request):
     question = random.choice(remaining_questions)
 
     if request.method == 'POST':
-        selected_answer = request.POST.get('answer').strip().lower()
+        selected_answer = request.POST.get('answer')
+
+        if not selected_answer:
+            return render(request, 'trivia/game.html', {
+                'question': question,
+                'error_message': 'Por favor, selecciona una respuesta antes de enviar.'
+            })
+
+        selected_answer = selected_answer.strip().lower()
         question_id = request.POST.get('question_id')
         question = Question.objects.get(id=question_id)
         correct_answer = question.correct_answer.strip().lower()
@@ -71,8 +80,12 @@ def trivia_game(request):
             request.session['lives'] -= 1
             print("Respuesta incorrecta")
 
+        request.session['answered_questions'].append(question.id)
+        request.session.modified = True
+
         if request.session['lives'] <= 0:
             return redirect('trivia:end_game')
+
 
     questions = Question.objects.all()
     question = random.choice(questions)
