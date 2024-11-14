@@ -45,13 +45,19 @@ def trivia_game(request):
         request.session['lives'] = 3
         request.session['score'] = 0
         request.session['questions_answered'] = 0
+        request.session['answered_questions'] = []
+
+    remaining_questions = Question.objects.exclude(id__in=request.session['answered_questions'])
+    if not remaining_questions.exists():
+        # Finalizar la partida si no hay preguntas restantes
+        return redirect('trivia:end_game')
+
+    question = random.choice(remaining_questions)
 
     if request.method == 'POST':
-        selected_answer = request.POST.get(
-            'answer').strip().lower()
+        selected_answer = request.POST.get('answer').strip().lower()
         question_id = request.POST.get('question_id')
         question = Question.objects.get(id=question_id)
-
         correct_answer = question.correct_answer.strip().lower()
 
         print(f"Selected answer: {selected_answer}")

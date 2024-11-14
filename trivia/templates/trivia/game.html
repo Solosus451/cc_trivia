@@ -4,7 +4,7 @@
 
 {% block content %}
 <h2>{{ question.question_text }}</h2>
-<form method="POST" action="{% url 'trivia:game' %}">
+<form method="POST" action="{% url 'trivia:game' %}" onsubmit="return validateForm()">
     {% csrf_token %}
     <p>{{ question.question_text }}</p>
     <input type="hidden" name="question_id" value="{{ question.id }}">
@@ -33,4 +33,22 @@
 </form>
 <p>Puntaje: {{ request.session.score }}</p>
 <p>Vidas: {{ request.session.lives }}</p>
+
+<script>
+function validateForm() {
+    const options = document.getElementsByName('answer');
+    let isChecked = false;
+    for (let i = 0; i < options.length; i++) {
+        if (options[i].checked) {
+            isChecked = true;
+            break;
+        }
+    }
+    if (!isChecked) {
+        alert('Por favor, selecciona una respuesta antes de enviar.');
+        return false;
+    }
+    return true;
+}
+</script>
 {% endblock %}
