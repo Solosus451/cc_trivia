@@ -80,15 +80,14 @@ def trivia_game(request):
             request.session['lives'] -= 1
             print("Respuesta incorrecta")
 
-        request.session['answered_questions'].append(question.id)
-        request.session.modified = True
+        if question.id not in request.session['answered_questions']:
+            request.session['answered_questions'].append(question.id)
+        request.session.modified = True  # Asegura que la sesión se actualice
+
+        print("Preguntas respondidas:", request.session['answered_questions'])
 
         if request.session['lives'] <= 0:
             return redirect('trivia:end_game')
-
-
-    questions = Question.objects.all()
-    question = random.choice(questions)
 
     context = {
         'question': question,
