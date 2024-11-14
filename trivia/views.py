@@ -97,6 +97,8 @@ def trivia_game(request):
         if not remaining_questions.exists():
             return redirect('trivia:end_game')
 
+    question = random.choice(remaining_questions)
+
     context = {
         'question': question,
     }
