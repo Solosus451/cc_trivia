@@ -48,6 +48,10 @@ def trivia_game(request):
         request.session['questions_answered'] = 0
         request.session['answered_questions'] = []
 
+    if not isinstance(request.session['answered_questions'], list):
+        request.session['answered_questions'] = []
+    request.session.modified = True
+
     remaining_questions = Question.objects.exclude(id__in=request.session['answered_questions'])
     if not remaining_questions.exists():
         # Finalizar la partida si no hay preguntas restantes
