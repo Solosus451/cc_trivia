@@ -65,7 +65,7 @@ def trivia_game(request):
             })
 
         selected_answer = selected_answer.strip().lower()
-        question_id = request.POST.get('question_id')
+        question_id = int(request.POST.get('question_id'))
         question = Question.objects.get(id=question_id)
         correct_answer = question.correct_answer.strip().lower()
 
@@ -82,11 +82,15 @@ def trivia_game(request):
 
         if question.id not in request.session['answered_questions']:
             request.session['answered_questions'].append(question.id)
-        request.session.modified = True  # Asegura que la sesión se actualice
+            request.session.modified = True
 
         print("Preguntas respondidas:", request.session['answered_questions'])
 
         if request.session['lives'] <= 0:
+            return redirect('trivia:end_game')
+
+        remaining_questions = Question.objects.exclude(id__in=request.session['answered_questions'])
+        if not remaining_questions.exists():
             return redirect('trivia:end_game')
 
     context = {
