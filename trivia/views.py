@@ -1,126 +1,108 @@
-from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
-from .models import Question, Leaderboard
-from django.contrib import messages
+from .models import Question, Answer, Game
 import random
 
 
-def home(request):
+def home(   request):
     return render(request, 'trivia/home.html')
 
 
-def instructions(request):
-    return render(request, 'trivia/instructions.html')
-
-
-
-def login_view(request):
-    if request.method == "POST":
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('home')
-        else:
-            return render(request, 'trivia/login.html', {'error': 'Credenciales incorrectas'})
-    return render(request, 'trivia/login.html')
-
-
-def register_view(request):
+def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)  # Inicia sesión automáticamente después de registrarse
+            return redirect('trivia:trivia')  # Redirigir directamente a la parte de trivia
     else:
         form = UserCreationForm()
     return render(request, 'trivia/register.html', {'form': form})
 
 
-@login_required
-def trivia_game(request):
-    if 'lives' not in request.session:
-        request.session['lives'] = 3
-        request.session['score'] = 0
-        request.session['questions_answered'] = 0
-        request.session['answered_questions'] = []
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('trivia:trivia')  # Redirigir a trivia después de iniciar sesión
+    else:
+        form = AuthenticationForm()
+    return render(request, 'trivia/login.html', {'form': form})
 
-    if not isinstance(request.session['answered_questions'], list):
-        request.session['answered_questions'] = []
-    request.session.modified = True
+@login_required(login_url='login')
+def instructions_view(request):
+    if request.method == 'POST':
+        user = request.user
+        # El juego empieza con puntaje 0 y 3 vidas
+        game = Game.objects.create(user=user, score=0, lives=3)
+        return redirect('trivia:play_game', game_id=game.id)
+    return render(request, 'trivia/instructions.html')
 
-    remaining_questions = Question.objects.exclude(id__in=request.session['answered_questions'])
-    if not remaining_questions.exists():
-        # Finalizar la partida si no hay preguntas restantes
-        return redirect('trivia:end_game')
 
-    question = random.choice(remaining_questions)
+@login_required(login_url='login')
+def start_game(request):
+    # El juego empieza con puntaje 0 y 3 vidas
+    user = request.user
+    game = Game.objects.create(user=user, score=0, lives=3)
+    return redirect('trivia:play_game', game_id=game.id)
+
+# Inicia el juego
+@login_required(login_url='login')
+def play_game(request, game_id):
+    game = get_object_or_404(Game, id=game_id, user=request.user)
+
+    # Ordena las preguntas que todavia no se respoden
+    answered_question_ids = game.answers.values_list('question__id', flat=True)
+    question = Question.objects.exclude(id__in=answered_question_ids).order_by('?').first()
+
+    # para cuando se acaben las preguntas te tira a la pantalla principal
+    if not question or game.lives <= 0:
+        return redirect('trivia:game_over', game_id=game.id)
 
     if request.method == 'POST':
-        selected_answer = request.POST.get('answer')
+        selected_option = request.POST.get('option')
 
-        if not selected_answer:
-            return render(request, 'trivia/game.html', {
-                'question': question,
-                'error_message': 'Por favor, selecciona una respuesta antes de enviar.'
-            })
+        if not selected_option:
+            messages.error(request, 'Por favor selecciona una respuesta antes de continuar.')
+            return redirect('trivia:play_game', game_id=game.id)
 
-        selected_answer = selected_answer.strip().lower()
-        question_id = int(request.POST.get('question_id'))
-        question = Question.objects.get(id=question_id)
-        correct_answer = question.correct_answer.strip().lower()
-
-        print(f"Selected answer: {selected_answer}")
-        print(f"Correct answer: {correct_answer}")
-
-        if selected_answer == correct_answer:
-            request.session['score'] += question.points
-            request.session['questions_answered'] += 1
-            print("Respuesta correcta")
+        if selected_option == question.correct_answer:
+            game.score += 1  # puntaje+ pregunta buena
         else:
-            request.session['lives'] -= 1
-            print("Respuesta incorrecta")
+            game.lives -= 1  # puntaje- pregunta mala (medio obvio)
+        game.save()
 
-        if question.id not in request.session['answered_questions']:
-            request.session['answered_questions'].append(question.id)
-            request.session.modified = True
+        # guarda la respuesta en la tabla de preguntas
+        Answer.objects.create(game=game, question=question, selected_answer=selected_option, user=request.user)
 
-        print("Preguntas respondidas:", request.session['answered_questions'])
 
-        if request.session['lives'] <= 0:
-            return redirect('trivia:end_game')
-
-        remaining_questions = Question.objects.exclude(id__in=request.session['answered_questions'])
-        if not remaining_questions.exists():
-            return redirect('trivia:end_game')
-
-    question = random.choice(remaining_questions)
+        return redirect('trivia:play_game', game_id=game.id)
 
     context = {
+        'game': game,
         'question': question,
     }
     return render(request, 'trivia/game.html', context)
 
 
-@login_required
-def end_game(request):
-    leaderboard_entry = Leaderboard.objects.create(
-        user=request.user,
-        score=request.session['score'],
-        correct_answers=request.session['questions_answered'],
-        incorrect_answers=3 - request.session['lives']
-    )
-    del request.session['lives']
-    del request.session['score']
-    del request.session['questions_answered']
+# Game Over
+@login_required(login_url='login')
+def game_over(request, game_id):
+    game = get_object_or_404(Game, id=game_id, user=request.user)
+    context = {
+        'final_score': game.score,
+        'total_questions': game.answers.count(),
+    }
+    return render(request, 'trivia/game_over.html', context)
 
-    return render(request, 'trivia/end_game.html', {'leaderboard_entry': leaderboard_entry})
-
-
-@login_required
-def leaderboard(request):
-    leaderboard_entries = Leaderboard.objects.order_by('-score')[:10]
-    return render(request, 'trivia/leaderboard.html', {'leaderboard_entries': leaderboard_entries})
